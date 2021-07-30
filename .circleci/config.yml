@@ -44,7 +44,9 @@ jobs:
           name: Build front-end
           command: |
             # Your code here
-            exit 1
+            cd frontened
+	    npm i
+	    npm run build
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
@@ -60,7 +62,9 @@ jobs:
           name: Back-end build
           command: |
              # Your code here
-             exit 1
+             cd backend
+	     npm i
+	     npm run build
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
@@ -68,34 +72,72 @@ jobs:
   test-frontend:
     docker:
       # Docker image here
+      - image: circleci/node:13.8.0
     steps:
       # Checkout code from git
       # Restore from cache
       # Your job code here
+      - checkout
+      - restore_cache:
+	  keys: [frontend-build]
+      - run:
+	  name: frontend test
+	  command: |
+	    cd frontend
+	    npm i
+	    npm run test
                 
   test-backend:
     docker:
       # Docker image here
+      - image: circleci/node:13.8.0
     steps:
       # Checkout code from git
       # Restore from cache
       # Your job code here
-            
+      - checkout
+      - restore_cache:
+          keys: [backend-build]
+      - run:
+          name: backend test
+          command: |
+            cd backend
+            npm i
+            npm run test      
+  
   scan-frontend:
     docker:
       # Docker image here
+      - image: circleci/node:13.8.0
     steps:
       # Checkout code from git
       # Restore from cache
       # Your job code here
+      - checkout
+      - restore_cache:
+          keys: [frontend-build]
+      - run:
+          name: Analyze the code
+          command: |
+            cd frontend
+            npm audit fix --audit-level=critical --force      
 
   scan-backend:
     docker:
       # Docker image here
+      - image: circleci/node:13.8.0	
     steps:
       # Checkout code from git
       # Restore from cache
       # Your job code here
+      - checkout
+      - restore_cache:
+          keys: [backend-build]
+      - run:
+          name: Analyze the code
+          command: |
+            cd backend
+            npm audit fix --audit-level=critical --force
 
   deploy-infrastructure:
     docker:
